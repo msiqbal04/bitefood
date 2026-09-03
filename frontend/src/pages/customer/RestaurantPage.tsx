@@ -80,10 +80,14 @@ export const RestaurantPage: React.FC = () => {
         const res = await restaurantService.getRestaurantDetails(id);
         
         if (isMounted) {
-          const data = res?.data?.data || res?.data || res;
-          if (data && data.name) {
+          // Robust unwrap: API wrapper chahe response.data bheje ya raw object
+          const raw = res?.data !== undefined ? res.data : res;
+          const data = raw?.data || raw;
+
+          if (data && (data.name || data.restaurantId || data._id)) {
             setRestaurant(data);
           } else {
+            console.error('Restaurant data received invalid shape:', res);
             setError('Restaurant details nahi mili.');
           }
         }
@@ -220,7 +224,6 @@ export const RestaurantPage: React.FC = () => {
     try {
       if (paymentType !== 'COD') {
         setProcessingPayment(true);
-        // Realistic gateway verification delay
         await new Promise((res) => setTimeout(res, 1200));
         setProcessingPayment(false);
       }
