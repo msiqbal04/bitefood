@@ -1,18 +1,12 @@
 import axios from 'axios';
 
-// Vite aur Create-React-App dono ke liye safe environment variable access
-const getBaseUrl = (): string => {
-  if (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL) {
-    return (import.meta as any).env.VITE_API_URL;
-  }
-  if (typeof globalThis !== 'undefined' && (globalThis as any).process?.env?.REACT_APP_API_URL) {
-    return (globalThis as any).process.env.REACT_APP_API_URL;
-  }
-  return 'http://localhost:5001/api';
-};
+// Vite static replacement ke sath robust Render production fallback
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  'https://bitefoodbackend.onrender.com/api';
 
 export const api = axios.create({
-  baseURL: getBaseUrl(),
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -52,7 +46,6 @@ export const adminApi = {
     const response = await api.get('/admin/stats');
     return response.data;
   },
-  // Fix for AdminDashboardPage.tsx
   getDashboardStats: async () => {
     const response = await api.get('/admin/stats');
     return response.data;
