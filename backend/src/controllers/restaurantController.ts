@@ -1,46 +1,42 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import { Restaurant } from '../models/Restaurant';
 
-// Get all Restaurants with search & filters
-export const getAllRestaurants = async (req: Request, res: Response): Promise<any> => {
+// Sabhi restaurants fetch karne ke liye
+export const getRestaurants = async (req: Request, res: Response) => {
   try {
-    const { search, cuisine, vegOnly } = req.query;
-    const filter: any = { isActive: true };
-
-    if (cuisine && cuisine !== 'All') {
-      filter.cuisine = new RegExp(String(cuisine), 'i');
-    }
-
-    if (vegOnly === 'true') {
-      filter['menu.isVeg'] = true;
-    }
-
-    if (search) {
-      const term = new RegExp(String(search), 'i');
-      filter.$or = [{ name: term }, { cuisine: term }, { 'menu.name': term }];
-    }
-
-    const restaurants = await Restaurant.find(filter);
-    return res.json({ success: true, count: restaurants.length, data: restaurants });
+    const restaurants = await Restaurant.find();
+    return res.status(200).json(restaurants);
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'Error fetching Restaurants', error });
+    return res.status(500).json({ message: 'Error fetching restaurants', error });
   }
 };
 
-// Get single Restaurant by restaurantId or _id
-export const getRestaurantById = async (req: Request, res: Response): Promise<any> => {
+// Single restaurant fetch karne ke liye (ObjectId ya custom string id dono support karta hai)
+export const getRestaurantById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const restaurant = await Restaurant.findOne({
-      $or: [{ restaurantId: id }, { _id: id }],
-    });
 
-    if (!restaurant) {
-      return res.status(404).json({ success: false, message: 'Restaurant not found' });
+    let restaurantData: any = null;
+
+    // 1. Agar MongoDB ObjectId format me hai
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      restaurantData = await Restaurant.findById(id).populate('menuItems');
     }
 
-    return res.json({ success: true, data: restaurant });
+    // 2. Agar custom id hai (jaise 'rest_1')
+    if (!restaurantData) {
+      restaurantData = await Restaurant.findOne({
+        $or: [{ id: id }, { customId: id }, { slug: id }]
+      }).populate('menuItems');
+    }
+
+    if (!restaurantData) {
+      return res.status(404).json({ message: 'Restaurant details nahi mili.' });
+    }
+
+    return res.status(200).json(restaurantData);
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'Error retrieving Restaurant', error });
+    return res.status(500).json({ message: 'Server error', error });
   }
 };
