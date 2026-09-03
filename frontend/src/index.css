@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 1. Light Mode (Default) */
+:root {
+  --bg-main: #f9fafb;
+  --bg-card: #ffffff;
+  --text-main: #111827;
+  --text-muted: #6b7280;
+  --border-color: #f3f4f6;
+  --input-bg: #f9fafb;
+}
+
+/* 2. Dark Mode Overrides */
+html.dark,
+[data-theme='dark'] {
+  --bg-main: #09090b !important;
+  --bg-card: #18181b !important;
+  --text-main: #f4f4f5 !important;
+  --text-muted: #a1a1aa !important;
+  --border-color: #27272a !important;
+  --input-bg: #27272a !important;
+  background-color: #09090b !important;
+  color: #f4f4f5 !important;
+}
+
+/* Force dark mode styles on cards & elements when dark is active */
+html.dark body,
+html.dark #root,
+html.dark .bg-gray-50,
+html.dark .bg-zinc-50 {
+  background-color: #09090b !important;
+}
+
+html.dark .bg-white {
+  background-color: #18181b !important;
+  color: #f4f4f5 !important;
+  border-color: #27272a !important;
+}
+
+html.dark .text-zinc-900,
+html.dark .text-zinc-800,
+html.dark .text-gray-900 {
+  color: #f4f4f5 !important;
+}
+
+html.dark .text-zinc-500,
+html.dark .text-zinc-400,
+html.dark .text-gray-500 {
+  color: #a1a1aa !important;
+}
+
+html.dark .border-gray-100,
+html.dark .border-gray-200 {
+  border-color: #27272a !important;
+}
